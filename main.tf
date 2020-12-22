@@ -186,7 +186,7 @@ resource "helm_release" "jhub" {
   namespace = var.hub_namespace
 
   values = [
-    file("values.yaml")
+    file("values.yml")
   ]
 }
 
