@@ -181,7 +181,6 @@ resource "helm_release" "jhub" {
   name = "jupyterhub"
   # repository = "https://jupyterhub.github.io/helm-chart/"
   # chart      = "jupyterhub"
-  # chart     = "./jupyterhub"
   chart     = "https://jupyterhub.github.io/helm-chart/jupyterhub-0.9.1.tgz"
   namespace = var.hub_namespace
 
