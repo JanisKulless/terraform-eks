@@ -168,7 +168,7 @@ provider "helm" {
     host                   = data.aws_eks_cluster.cluster.endpoint
     token                  = data.aws_eks_cluster_auth.cluster.token
     cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
-    load_config_file       = false
+    # load_config_file       = false
   }
 }
 
@@ -178,13 +178,15 @@ provider "helm" {
 # https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release
 
 resource "helm_release" "jhub" {
-  name       = "jupyterhub"
-  repository = "https://jupyterhub.github.io/helm-chart/"
-  chart      = "jupyterhub"
-  namespace  = var.hub_namespace
+  name = "jupyterhub"
+  # repository = "https://jupyterhub.github.io/helm-chart/"
+  # chart      = "jupyterhub"
+  # chart     = "./jupyterhub"
+  chart     = "https://jupyterhub.github.io/helm-chart/jupyterhub-0.9.1.tgz"
+  namespace = var.hub_namespace
 
   values = [
-    file("values.yml")
+    file("values.yaml")
   ]
 }
 
