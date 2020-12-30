@@ -1,0 +1,18 @@
+# Try to config Vault with your own bucket
+
+server:
+  ha:
+    config: |
+      listener "tcp" {
+        address         = "[::]:8200"
+        cluster_address = "[::]:8201"
+      }
+
+      storage "s3" {
+       access_key = "YOUR AWS ACCESS KEY"
+       secret_key = "YOUR AWS SECRET ACESS KEY"
+       bucket     = "YOUR BUCKET NAME"
+       region     = "eu-central-1"
+      }
+
+      service_registration "kubernetes" {}

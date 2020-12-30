@@ -3,7 +3,7 @@
 # https://zero-to-jupyterhub.readthedocs.io/en/latest/jupyterhub/customization.html
 
 proxy:
-  secretToken: "YOUR HEX TOKEN HERE"
+  secretToken: "YOUR HEX TOKEN"
   https:
     enabled: false
 

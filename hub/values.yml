@@ -1,0 +1,37 @@
+# All kind of configuration goes here
+# See the guide
+# https://zero-to-jupyterhub.readthedocs.io/en/latest/jupyterhub/customization.html
+
+proxy:
+  secretToken: "ba12d1dcc1d9e90ea595b108a24bc1e406c0d6f5fdd73b1f169b8dcb952e3219"
+  https:
+    enabled: false
+
+auth:
+  type: dummy
+  dummy:
+    password: 'supersecretpassword!'
+  whitelist:
+    users:
+      - admin
+
+singleuser:
+
+  memory:
+    limit: 500M
+    guarantee: 500M
+
+  storage:
+    extraVolumes:
+      - name: mntdatas3fs
+        hostPath:
+          path: /mnt/s3data
+    extraVolumeMounts:
+      - name: mntdatas3fs
+        mountPath: /home/jovyan/shared
+
+  extraEnv:
+    GRANT_SUDO: "yes"
+    NOTEBOOK_ARGS: "--allow-root"
+  uid: 0
+  cmd: start-singleuser.sh

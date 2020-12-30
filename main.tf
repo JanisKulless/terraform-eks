@@ -20,6 +20,10 @@ variable "hub_namespace" {
   default = "default"
 }
 
+variable "vault_namespace" {
+  default = "default"
+}
+
 ###############################################################################
 ################################ DATA SOURCES #################################
 ###############################################################################
@@ -56,6 +60,16 @@ data "aws_region" "current" {}
 # Availability zones data source to get list of AWS Availability zones
 data "aws_availability_zones" "available" {
   state = "available"
+}
+
+# Data sources used to connect EKS to VPC
+
+data "aws_eks_cluster" "cluster" {
+  name = module.eks.cluster_id
+}
+
+data "aws_eks_cluster_auth" "cluster" {
+  name = module.eks.cluster_id
 }
 
 ###############################################################################
@@ -135,18 +149,21 @@ module "eks" {
 }
 
 ###############################################################################
-############################### KUBERNETES CONFIG #############################
+################################## PROVIDERS ##################################
 ###############################################################################
 
-# Data sources used to connect EKS to VPC
+terraform {
 
-data "aws_eks_cluster" "cluster" {
-  name = module.eks.cluster_id
+  required_providers {
+    kubectl = {
+      source  = "gavinbunney/kubectl"
+      version = ">= 1.7.0"
+    }
+  }
 }
 
-data "aws_eks_cluster_auth" "cluster" {
-  name = module.eks.cluster_id
-}
+
+# Kubernetes
 
 provider "kubernetes" {
   host                   = data.aws_eks_cluster.cluster.endpoint
@@ -154,11 +171,6 @@ provider "kubernetes" {
   cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
   load_config_file       = false
 }
-
-
-###############################################################################
-############################### HELM J-HUB ####################################
-###############################################################################
 
 # Helm provider installs in Kubernetes cluster
 
@@ -172,32 +184,67 @@ provider "helm" {
   }
 }
 
-# This thing pulls J-hub Helm chart and uses your values.yaml file
-# Uses default namespace, but you can change that
-# See the docs:
-# https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release
+# Kubectl for kubectl_manifests
 
+
+provider "kubectl" {
+  host                   = data.aws_eks_cluster.cluster.endpoint
+  token                  = data.aws_eks_cluster_auth.cluster.token
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
+  load_config_file       = false
+}
+
+##############################################################################
+################################ VAULT CONF ###################################
+###############################################################################
+
+resource "helm_release" "vault" {
+  name       = "vault-primary"
+  repository = "https://helm.releases.hashicorp.com/"
+  chart      = "vault"
+  namespace  = var.vault_namespace
+  depends_on = [kubectl_manifest.deamonset]
+
+  values = [
+    file("./vault/values.yml")
+  ]
+}
+
+# TODO DYNAMIC NAMESPACES. WITH RESOURCES?
+#
+#
+
+###############################################################################
+############################### HELM J-HUB ####################################
+###############################################################################
+
+# # This thing pulls J-hub Helm chart and uses your values.yaml file
+# # Uses default namespace, but you can change that
+# # See the docs:
+# # https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release
+#
 resource "helm_release" "jhub" {
   name = "jupyterhub"
   # repository = "https://jupyterhub.github.io/helm-chart/"
   # chart      = "jupyterhub"
-  chart     = "https://jupyterhub.github.io/helm-chart/jupyterhub-0.9.1.tgz"
-  namespace = var.hub_namespace
+  chart      = "https://jupyterhub.github.io/helm-chart/jupyterhub-0.9.1.tgz"
+  namespace  = var.hub_namespace
+  depends_on = [kubectl_manifest.deamonset]
 
   values = [
-    file("values.yml")
+    file("./hub/values.yml")
   ]
 }
-
-###############################################################################
-############################### S3 BUCKETS ####################################
-###############################################################################
-
-# Deleted all S3 buckets for now, add your buckets when finished
-
-###############################################################################
-############################## J-HUB ADRESS ###################################
-###############################################################################
+#
+# ###############################################################################
+# ############################### S3 BUCKETS ####################################
+# ###############################################################################
+#
+# # Deleted all S3 buckets for now, add your buckets when finished
+#
+# ###############################################################################
+# ############################## J-HUB ADRESS ###################################
+# ###############################################################################
 
 resource "time_sleep" "wait_30_seconds" {
   depends_on = [helm_release.jhub]
