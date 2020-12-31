@@ -16,7 +16,7 @@
 8) Run **terraform apply**. Resource creation should take approx 10 - 15 minutes.
 9) Script should print out j-hub address. If not, proceed with **aws eks --region eu-central-1 update-kubeconfig --name test-cluster** and **kubectl --namespace=default get svc proxy-public**.
 11) Password and login is kept in values.yml file. By default: **admin** and **supersecretpassword!**.
-12) Vault UI is accessible by running **kubectl port-forward vault-0 8200:8200** and then going to **http://127.0.0.1:8200/** in your browser.
+12) Vault UI is accessible by running **kubectl port-forward vault-primary-0 8200:8200** and then going to **http://127.0.0.1:8200/** in your browser.
 13) As for now s3 bucket is possible to access going root in Jupyterhub notebook terminal, by running **sudo su -** and then navigating to **/home/jovian/shared/**
 14) To clean up run **terraform destroy**.
 

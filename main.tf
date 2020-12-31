@@ -206,7 +206,7 @@ resource "helm_release" "vault" {
   depends_on = [kubectl_manifest.deamonset]
 
   values = [
-    file("./vault/values.yml")
+    file("/vault/values.yml")
   ]
 }
 
@@ -232,7 +232,7 @@ resource "helm_release" "jhub" {
   depends_on = [kubectl_manifest.deamonset]
 
   values = [
-    file("./hub/values.yml")
+    file("/hub/values.yml")
   ]
 }
 #

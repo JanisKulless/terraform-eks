@@ -1,9 +1,5 @@
-# All kind of configuration goes here
-# See the guide
-# https://zero-to-jupyterhub.readthedocs.io/en/latest/jupyterhub/customization.html
-
 proxy:
-  secretToken: "ba12d1dcc1d9e90ea595b108a24bc1e406c0d6f5fdd73b1f169b8dcb952e3219"
+  secretToken: "YOUR HEX TOKEN HERE"
   https:
     enabled: false
 
