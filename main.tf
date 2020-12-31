@@ -199,14 +199,13 @@ provider "kubectl" {
 ###############################################################################
 
 resource "helm_release" "vault" {
-  name       = "vault-primary"
-  repository = "https://helm.releases.hashicorp.com/"
-  chart      = "vault"
+  name       = "vault"
+  chart      = "https://helm.releases.hashicorp.com/vault-0.8.0.tgz"
   namespace  = var.vault_namespace
   depends_on = [kubectl_manifest.deamonset]
 
   values = [
-    file("/vault/values.yml")
+    file("./vault/values.yml")
   ]
 }
 
@@ -232,7 +231,7 @@ resource "helm_release" "jhub" {
   depends_on = [kubectl_manifest.deamonset]
 
   values = [
-    file("/hub/values.yml")
+    file("./hub/values.yml")
   ]
 }
 #
